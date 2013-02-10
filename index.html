@@ -15,7 +15,30 @@
 
     <script>
 
-        // Call axis here...
+        var data = [
+            {
+                x: "Sat 09 Feb 2013 05:00:00 GMT",
+                y: 2
+            },
+            {
+                x: "Sat 09 Feb 2013 05:01:00 GMT",
+                y: 7
+            },
+            {
+                x: "Sat 09 Feb 2013 05:02:00 GMT",
+                y: 5
+            },
+            {
+                x: "Sat 09 Feb 2013 05:07:00 GMT",
+                y: 3
+            }
+        ];
+
+        var lineChart = axis.lineChart({
+            selector   : '#graph',
+            timeseries : true,
+            data       : data
+        });
 
     </script>
 

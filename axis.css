@@ -1,1 +1,15 @@
 /* Base CSS */
+
+svg[class^="axis-"] text {
+    font-family: sans-serif;
+    font-size: 10px;
+    color: #333;
+}
+
+.axis path,
+.axis line {
+    stroke-width: 1px;
+    stroke: #333;
+    fill: none;
+    shape-rendering: crispEdges;
+}

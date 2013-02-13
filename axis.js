@@ -3,7 +3,7 @@
     // Alias axis for internal use.
     var a = window.axis = {};
 
-    // [green, blue, yellow, orange/red, purple]
+    // [green, blue, yellow, red, purple]
     var colors = ['#5EE873', '#67BCFF', '#FFED74', '#E88A5E', '#ED74FF'];
 
     // Basic line chart object
@@ -23,7 +23,7 @@
 
         this.width = (opt.width || 500) - this.margin.left - this.margin.right;
         this.height = (opt.height || 300) - this.margin.top - this.margin.bottom;
-        this.isTimeseries = opt.isTimeseries || true; // Change back to false
+        this.isTimeseries = opt.isTimeseries || false;
 
         this.data = opt.data;
 
@@ -42,7 +42,6 @@
                 .y(function(d) { return self.yScale(d.y); });
 
             self.svg.append('path')
-                //.attr('
                 .style('stroke', colors[0])
                 .attr('class', 'line')
                 .attr('d', line);
@@ -108,15 +107,26 @@
         var scale;
 
         if (self.isTimeseries) {
+
              scale = d3.time.scale()
                 .domain(d3.extent(self.data, function(d) {
                     return new Date(d.x);
                 }))
                 .range([self.margin.left, self.width]);
-                
+
             return scale;
+
         } else {
-            // non-timeseries xScale...
+
+            var xMin = d3.min(self.data, function(d) { return d.x; });
+            var xMax = d3.max(self.data, function(d) { return d.x; });
+
+            scale = d3.scale.linear()
+                .domain([xMin, xMax])
+                .range([(self.margin.left + self.margin.right), self.width]);
+
+            return scale;
+
         }
 
     }

@@ -6,6 +6,12 @@ svg[class^="axis-"] text {
     color: #333;
 }
 
+.line {
+    fill: none;
+    stroke-width: 2px;
+    stroke: #999;
+}
+
 .axis path,
 .axis line {
     stroke-width: 1px;

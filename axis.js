@@ -3,7 +3,8 @@
     // Alias axis for internal use.
     var a = window.axis = {};
 
-    var colors = ['red', 'green', 'blue', 'yellow', 'black'];
+    // [green, blue, yellow, orange/red, purple]
+    var colors = ['#5EE873', '#67BCFF', '#FFED74', '#E88A5E', '#ED74FF'];
 
     // Basic line chart object
     function lineChart(opt) { 
@@ -29,35 +30,22 @@
         this.xScale = xScale(this);
         this.yScale = yScale(this);
 
-        this.draw = function() {
+        // Draw axis
+        drawAxis(this);
 
-            self.svg = d3.select(self.selector)
-                .data(self.data)
-                .append('svg')
-                .attr('class', 'axis-line-chart')
-                .attr('width', self.width + self.margin.left + self.margin.right)
-                .attr('height', self.height + self.margin.top + self.margin.bottom)
-                .append('g');
+        this.draw = function(self) {
 
-            self.xAxis = d3.svg.axis()
-                .scale(self.xScale)
-                .orient('bottom');
+            console.log(self.data);
 
-            self.svg
-                .append('g')
-                .attr('class', 'axis')
-                .attr('transform', 'translate(0, ' + self.height + ')')
-                .call(self.xAxis);
+            var line = d3.svg.line()
+                .x(function(d) { return self.xScale(new Date(d.x)); })
+                .y(function(d) { return self.yScale(d.y); });
 
-            self.yAxis = d3.svg.axis()
-                .orient('left')
-                .scale(self.yScale);
-
-            self.svg
-                .append('g')
-                .attr('class', 'axis')
-                .attr('transform', 'translate(' + self.margin.left + ', 0)')
-                .call(self.yAxis);
+            self.svg.append('path')
+                //.attr('
+                .style('stroke', colors[0])
+                .attr('class', 'line')
+                .attr('d', line);
 
         };
 
@@ -65,7 +53,39 @@
         };
 
         // Draw out chart
-        this.draw();
+        this.draw(this);
+
+    }
+
+    function drawAxis(self) {
+
+        self.svg = d3.select(self.selector)
+            .data([self.data])
+            .append('svg')
+            .attr('class', 'axis-line-chart')
+            .attr('width', self.width + self.margin.left + self.margin.right)
+            .attr('height', self.height + self.margin.top + self.margin.bottom)
+            .append('g');
+
+        self.xAxis = d3.svg.axis()
+            .scale(self.xScale)
+            .orient('bottom');
+
+        self.svg
+            .append('g')
+            .attr('class', 'axis')
+            .attr('transform', 'translate(0, ' + self.height + ')')
+            .call(self.xAxis);
+
+        self.yAxis = d3.svg.axis()
+            .orient('left')
+            .scale(self.yScale);
+
+        self.svg
+            .append('g')
+            .attr('class', 'axis')
+            .attr('transform', 'translate(' + self.margin.left + ', 0)')
+            .call(self.yAxis);
 
     }
 

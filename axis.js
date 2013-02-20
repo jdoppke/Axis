@@ -33,14 +33,16 @@
         // Draw axis
         drawAxis(this);
 
-        this.draw = function(self) {
-
-            console.log(self.data);
+        this.draw = function() {
 
             var line = d3.svg.line()
                 .x(function(d) { return self.xScale(new Date(d.x)); })
                 .y(function(d) { return self.yScale(d.y); });
 
+            self.svg.select('.line')
+                .remove();
+
+            // TODO: handle dynamic/custom colors
             self.svg.append('path')
                 .style('stroke', colors[0])
                 .attr('class', 'line')
@@ -48,11 +50,26 @@
 
         };
 
-        this.update = function() {
+        // TODO: When passing in newData, need to handle more than one
+        // additional data set and transition option.
+        this.update = function(newData) {
+
+            // Add new dataset
+            self.data.push(newData);
+
+            // Remove old dataset
+            self.data.shift();
+
+            // Rescale x/y axis
+            //rescaleAxis(self);
+
+            // Redraw the line with the new data point.
+            self.draw(self);
+
         };
 
         // Draw out chart
-        this.draw(this);
+        this.draw();
 
     }
 
@@ -67,12 +84,12 @@
             .append('g');
 
         self.xAxis = d3.svg.axis()
-            .scale(self.xScale)
-            .orient('bottom');
+            .orient('bottom')
+            .scale(self.xScale);
 
         self.svg
             .append('g')
-            .attr('class', 'axis')
+            .attr('class', 'axis x-axis')
             .attr('transform', 'translate(0, ' + self.height + ')')
             .call(self.xAxis);
 
@@ -82,17 +99,35 @@
 
         self.svg
             .append('g')
-            .attr('class', 'axis')
+            .attr('class', 'axis y-axis')
             .attr('transform', 'translate(' + self.margin.left + ', 0)')
             .call(self.yAxis);
 
     }
 
+    function rescaleAxis(self) {
+
+        self.yScale.domain([d3min(self.data, 'y'), d3max(self.data, 'y')]);
+        self.svg.select('.y-axis').call(self.yAxis);
+
+        self.xScale.domain([d3min(self.data, 'x'), d3max(self.data, 'x')]);
+        self.svg.select('.x-axis').call(self.xAxis);
+
+    }
+
+    function d3min(data, key) {
+        return d3.min(data, function(d) { return d[key]; });
+    }
+
+    function d3max(data, key) {
+        return d3.max(data, function(d) { return d[key]; });
+    }
+
     function yScale(self) {
 
         var yScale;
-        var yMin = d3.min(self.data, function(d) { return d.y; });
-        var yMax = d3.max(self.data, function(d) { return d.y; });
+        var yMin = d3min(self.data, 'y');
+        var yMax = d3max(self.data, 'y');
 
         yScale = d3.scale.linear()
             .domain([yMin, yMax])
@@ -118,8 +153,8 @@
 
         } else {
 
-            var xMin = d3.min(self.data, function(d) { return d.x; });
-            var xMax = d3.max(self.data, function(d) { return d.x; });
+            var xMin = d3min(self.data, 'x');
+            var xMax = d3max(self.data, 'x');
 
             scale = d3.scale.linear()
                 .domain([xMin, xMax])

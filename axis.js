@@ -14,6 +14,8 @@
         this.opt = opt || {};
         this.selector = opt.selector || 'body';
 
+        this.isTimeseries = opt.isTimeseries || false;
+
         this.margin = opt.margin || {
             top: 0,
             right: 0,
@@ -120,14 +122,14 @@
 
     function rescaleAxis(self) {
 
-        self.yScale.domain([d3min(self.data, 'y'), d3max(self.data, 'y')]);
+        self.yScale.domain([d3min(self.data, 'y', false), d3max(self.data, 'y', false)]);
         self.svg.select('.y-axis')
             .transition()
             .duration(1000)
             .ease('linear')
             .call(self.yAxis);
 
-        self.xScale.domain([d3min(self.data, 'x'), d3max(self.data, 'x')]);
+        self.xScale.domain([d3min(self.data, 'x', self.isTimeseries), d3max(self.data, 'x', self.isTimeseries)]);
         self.svg.select('.x-axis')
             .transition()
             .duration(1000)
@@ -136,19 +138,27 @@
 
     }
 
-    function d3min(data, key) {
-        return d3.min(data, function(d) { return d[key]; });
+    function d3min(data, key, isTimeseries) {
+        if (key == 'x' && isTimeseries) {
+            return d3.min(data, function(d) { return new Date(d[key]); });
+        } else {
+            return d3.min(data, function(d) { return d[key]; });
+        }
     }
 
-    function d3max(data, key) {
-        return d3.max(data, function(d) { return d[key]; });
+    function d3max(data, key, isTimeseries) {
+        if (key == 'x' && isTimeseries) {
+            return d3.max(data, function(d) { return new Date(d[key]); });
+        } else {
+            return d3.max(data, function(d) { return d[key]; });
+        }
     }
 
     function yScale(self) {
 
         var yScale;
-        var yMin = d3min(self.data, 'y');
-        var yMax = d3max(self.data, 'y');
+        var yMin = d3min(self.data, 'y', false);
+        var yMax = d3max(self.data, 'y', false);
 
         yScale = d3.scale.linear()
             .domain([yMin, yMax])
@@ -174,8 +184,8 @@
 
         } else {
 
-            var xMin = d3min(self.data, 'x');
-            var xMax = d3max(self.data, 'x');
+            var xMin = d3min(self.data, 'x', false);
+            var xMax = d3max(self.data, 'x', false);
 
             scale = d3.scale.linear()
                 .domain([xMin, xMax])

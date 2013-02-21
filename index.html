@@ -33,30 +33,18 @@
                 y: 4
             }
         ];
-
+/*
         var data = [
-            {
-                x: 1,
-                y: 2
-            },
-            {
-                x: 2,
-                y: 6
-            },
-            {
-                x: 3,
-                y: 5
-            },
-            {
-                x: 4,
-                y: 4
-            }
+            {x: 1, y: 2},
+            {x: 2, y: 6}
         ];
-
+*/
         var lineChart = axis.lineChart({
-            selector   : '#graph',
-            //timeseries : true,
-            data       : data
+            selector     : '#graph',
+            width        : 500,
+            height       : 300,
+            isTimeseries : true,
+            data         : data
         });
 
     </script>

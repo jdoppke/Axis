@@ -30,23 +30,35 @@
         this.xScale = xScale(this);
         this.yScale = yScale(this);
 
+        this.svg = d3.select(this.selector)
+            .data([this.data])
+            .append('svg')
+            .attr('class', 'axis-line-chart')
+            .attr('width', this.width + this.margin.left + this.margin.right)
+            .attr('height', this.height + this.margin.top + this.margin.bottom)
+            .append('g');
+
         // Draw axis
         drawAxis(this);
 
         this.draw = function() {
 
-            var line = d3.svg.line()
-                .x(function(d) { return self.xScale(new Date(d.x)); })
+            // TODO: Handle multiple data sets on one graph.
+            self.line = d3.svg.line()
+                .x(function(d) {
+                    if (self.isTimeseries) {
+                        return self.xScale(new Date(d.x)); 
+                    } else {
+                        return self.xScale(d.x);
+                    }
+                })
                 .y(function(d) { return self.yScale(d.y); });
 
-            self.svg.select('.line')
-                .remove();
-
             // TODO: handle dynamic/custom colors
-            self.svg.append('path')
-                .style('stroke', colors[0])
+            self.path = self.svg.append('path')
+                .style('stroke', colors[1])
                 .attr('class', 'line')
-                .attr('d', line);
+                .attr('d', self.line);
 
         };
 
@@ -57,14 +69,17 @@
             // Add new dataset
             self.data.push(newData);
 
-            // Remove old dataset
-            self.data.shift();
-
             // Rescale x/y axis
-            //rescaleAxis(self);
+            rescaleAxis(self);
 
-            // Redraw the line with the new data point.
-            self.draw(self);
+            self.path
+                .transition()
+                .duration(1000)
+                .ease('linear')
+                .attr('d', self.line);
+
+            // Remove old dataset
+            // self.data.shift();
 
         };
 
@@ -75,27 +90,25 @@
 
     function drawAxis(self) {
 
-        self.svg = d3.select(self.selector)
-            .data([self.data])
-            .append('svg')
-            .attr('class', 'axis-line-chart')
-            .attr('width', self.width + self.margin.left + self.margin.right)
-            .attr('height', self.height + self.margin.top + self.margin.bottom)
-            .append('g');
-
         self.xAxis = d3.svg.axis()
             .orient('bottom')
             .scale(self.xScale);
+
+        self.yAxis = d3.svg.axis()
+            .orient('left')
+            .scale(self.yScale);
+
+        // Not really turning the axis off, just removing the ticks
+        if (self.opt.axisOff) {
+            self.xAxis.tickValues([]);
+            self.yAxis.tickValues([]);
+        }
 
         self.svg
             .append('g')
             .attr('class', 'axis x-axis')
             .attr('transform', 'translate(0, ' + self.height + ')')
             .call(self.xAxis);
-
-        self.yAxis = d3.svg.axis()
-            .orient('left')
-            .scale(self.yScale);
 
         self.svg
             .append('g')
@@ -108,10 +121,18 @@
     function rescaleAxis(self) {
 
         self.yScale.domain([d3min(self.data, 'y'), d3max(self.data, 'y')]);
-        self.svg.select('.y-axis').call(self.yAxis);
+        self.svg.select('.y-axis')
+            .transition()
+            .duration(1000)
+            .ease('linear')
+            .call(self.yAxis);
 
         self.xScale.domain([d3min(self.data, 'x'), d3max(self.data, 'x')]);
-        self.svg.select('.x-axis').call(self.xAxis);
+        self.svg.select('.x-axis')
+            .transition()
+            .duration(1000)
+            .ease('linear')
+            .call(self.xAxis);
 
     }
 
